@@ -1,0 +1,6 @@
+build/
+install/
+log/
+tools/__pycache__/
+tools/.seg_cache.pkl
+src/assemforchouk_sim/meshes/.manifest.pkl

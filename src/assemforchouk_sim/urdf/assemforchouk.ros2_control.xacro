@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- ros2_control hardware description; the actual controllers live in
+       config/controllers.yaml. -->
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <joint name="carriage_slide">
+      <command_interface name="position">
+        <param name="min">${slide_lower}</param>
+        <param name="max">${slide_upper}</param>
+      </command_interface>
+      <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="pusher_extend">
+      <command_interface name="position">
+        <param name="min">${push_lower}</param>
+        <param name="max">${push_upper}</param>
+      </command_interface>
+      <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="lift">
+      <command_interface name="position">
+        <param name="min">${lift_lower}</param>
+        <param name="max">${lift_upper}</param>
+      </command_interface>
+      <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="shelf_extend">
+      <command_interface name="position">
+        <param name="min">${shelf_lower}</param>
+        <param name="max">${shelf_upper}</param>
+      </command_interface>
+      <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+</robot>

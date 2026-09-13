@@ -1,0 +1,48 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 200  # Hz
+    use_sim_time: true
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    # Coordinated motion: this is what the work-cycle demo drives.
+    cell_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    # Manual jogging; configured but left inactive because it claims the same
+    # command interfaces as cell_controller.  Swap with:
+    #   ros2 control switch_controllers --deactivate cell_controller \
+    #                                   --activate jog_controller
+    jog_controller:
+      type: position_controllers/JointGroupPositionController
+
+cell_controller:
+  ros__parameters:
+    joints:
+      - carriage_slide
+      - pusher_extend
+      - lift
+      - shelf_extend
+    command_interfaces: [position]
+    state_interfaces:   [position, velocity]
+    state_publish_rate: 100.0
+    action_monitor_rate: 40.0
+    allow_partial_joints_goal: true
+    constraints:
+      stopped_velocity_tolerance: 0.02
+      goal_time: 2.0
+      # trajectory tolerances scale with each axis' stroke; pusher_extend went
+      # from 0.35 m to 0.80 m of travel, so its band was widened to match
+      carriage_slide: {trajectory: 0.25, goal: 0.03}
+      pusher_extend:  {trajectory: 0.25, goal: 0.02}
+      lift:           {trajectory: 0.25, goal: 0.03}
+      shelf_extend:   {trajectory: 0.25, goal: 0.03}
+
+jog_controller:
+  ros__parameters:
+    joints:
+      - carriage_slide
+      - pusher_extend
+      - lift
+      - shelf_extend

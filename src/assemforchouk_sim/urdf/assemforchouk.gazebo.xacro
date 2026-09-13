@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- The cell is a single welded structure plus four prismatic axes that never
+       touch each other; self-collision would only cost time and add jitter. -->
+  <xacro:macro name="gz_link" params="name mu:=0.8 restitution:=0.0">
+    <gazebo reference="${name}">
+      <self_collide>false</self_collide>
+      <mu1>${mu}</mu1>
+      <mu2>${mu}</mu2>
+      <kp>1e7</kp>
+      <kd>1e4</kd>
+      <maxContacts>8</maxContacts>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:gz_link name="base_link"     mu="0.7"/>
+  <xacro:gz_link name="carriage"      mu="0.9"/>
+  <xacro:gz_link name="pusher"        mu="0.9"/>
+  <xacro:gz_link name="lift_carriage" mu="0.5"/>
+  <xacro:gz_link name="shelf"         mu="0.9"/>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system"
+            name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(arg controllers_file)</parameters>
+    </plugin>
+  </gazebo>
+</robot>

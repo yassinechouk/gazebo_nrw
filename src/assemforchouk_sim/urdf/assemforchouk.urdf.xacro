@@ -1,0 +1,287 @@
+<?xml version="1.0"?>
+<!--
+  Assemforchouk - vertical chain lift (paternoster) AS/RS cell.
+
+  Rebuilt for ROS 2 / Gazebo from the SolidWorks URDF export in ../../../urdf.
+  Kinematics (joint origins, rpy, axes) are taken verbatim from that export and
+  were verified by forward kinematics against the CAD geometry.  Geometry,
+  names, limits, inertia of the dummy carriage, and the world attachment are
+  reconstructed - see docs/RECONSTRUCTION.md for exactly what changed and why.
+
+      world ─fixed─ base_link ┬─ carriage_slide (X) ─ carriage ─ pusher_extend (X) ─ pusher
+                              └─ lift           (Z) ─ lift_carriage ─ shelf_extend (Y) ─ shelf
+-->
+<robot name="assemforchouk" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="fix_to_world"  default="true"/>
+  <xacro:arg name="use_gazebo"    default="true"/>
+  <xacro:arg name="controllers_file"
+             default="$(find assemforchouk_sim)/config/controllers.yaml"/>
+
+  <xacro:property name="mesh" value="package://assemforchouk_sim/meshes"/>
+
+  <!-- Plinth underside sits at z = -3.592 in the CAD base frame; lift the whole
+       model so the machine stands on the ground plane. -->
+  <xacro:property name="ground_offset" value="3.592"/>
+
+  <!-- ============================ travel limits ============================
+       The export had every joint at +/-50 m with 1 N effort, which is neither
+       reachable nor strong enough to hold the parts up.  These are derived
+       from the recovered geometry (see docs/RECONSTRUCTION.md, "Joint limits"). -->
+  <xacro:property name="slide_lower"  value="-1.90"/>
+  <xacro:property name="slide_upper"  value="3.40"/>
+  <xacro:property name="push_lower"   value="0.0"/>
+  <xacro:property name="push_upper"   value="1.05"/>
+  <!-- The lift is a full paternoster loop, not just a hoist: the carrier rises on
+       the conveyor side, goes over the top sprocket, down the far side, under the
+       bottom sprocket and back up.  The range therefore has to reach the top and
+       bottom of the chain wrap, not just the storage levels. -->
+  <xacro:property name="lift_lower"   value="-2.05"/>
+  <xacro:property name="lift_upper"   value="4.10"/>
+  <xacro:property name="shelf_lower"  value="-0.15"/>
+  <xacro:property name="shelf_upper"  value="1.15"/>
+  <!-- shelf deck abuts the carriage deck edge-to-edge at exactly this value -->
+  <xacro:property name="shelf_transfer" value="1.055"/>
+
+  <xacro:include filename="$(find assemforchouk_sim)/urdf/materials.xacro"/>
+
+  <!-- =========================== world attachment =========================== -->
+  <xacro:if value="$(arg fix_to_world)">
+    <link name="world"/>
+    <joint name="world_to_base" type="fixed">
+      <parent link="world"/>
+      <child  link="base_link"/>
+      <origin xyz="0 0 ${ground_offset}" rpy="0 0 0"/>
+    </joint>
+  </xacro:if>
+
+  <!-- ========================= base_link : the cell ========================= -->
+  <link name="base_link">
+    <!-- SolidWorks mass/inertia kept; its exported centre of mass (z = +4.65)
+         lies outside the exported geometry, so the geometric centroid is used
+         instead.  base_link is world-fixed, so this is inert either way. -->
+    <inertial>
+      <origin xyz="-1.037 -4.589 -0.498" rpy="0 0 0"/>
+      <mass value="2259.2"/>
+      <inertia ixx="4719.6" ixy="87.766" ixz="50.036"
+               iyy="13025"  iyz="-249.6" izz="10834"/>
+    </inertial>
+
+    <visual name="plinth">      <geometry><mesh filename="${mesh}/base_floor.stl"/></geometry>       <material name="concrete"/>     </visual>
+    <visual name="towers">      <geometry><mesh filename="${mesh}/base_tower.stl"/></geometry>       <material name="steel_frame"/>  </visual>
+    <visual name="rollerframe"> <geometry><mesh filename="${mesh}/base_rollerframe.stl"/></geometry> <material name="steel_frame"/>  </visual>
+    <visual name="rollers">     <geometry><mesh filename="${mesh}/base_roller.stl"/></geometry>      <material name="steel_light"/>  </visual>
+    <visual name="drums">       <geometry><mesh filename="${mesh}/base_drum.stl"/></geometry>        <material name="safety_orange"/></visual>
+    <visual name="drive">       <geometry><mesh filename="${mesh}/base_drive.stl"/></geometry>       <material name="steel_dark"/>   </visual>
+    <visual name="chains">      <geometry><mesh filename="${mesh}/base_chain.stl"/></geometry>       <material name="steel_dark"/>   </visual>
+
+    <!-- Collision uses primitives only.  The visual meshes are 40 k triangles;
+         feeding those to the physics engine would make the sim unusable. -->
+    <!-- The CAD "floor" part is a 50 mm slab plus the open legs of the roller
+         table, not a solid plinth: only the slab and the roller bed are solid. -->
+    <collision name="floor_pad_col">
+      <origin xyz="-1.0370 -4.5890 -3.5670"/>
+      <geometry><box size="7.7090 4.6420 0.0500"/></geometry>
+    </collision>
+    <collision name="roller_bed_col">
+      <origin xyz="-1.4320 -5.7230 -1.5720"/>
+      <geometry><box size="5.8800 1.0000 0.0600"/></geometry>
+    </collision>
+    <!-- lift tower frames, at the measured extents so the shelf clears them -->
+    <collision name="tower_left_col">
+      <origin xyz="-3.9660 -4.3270 -0.4770"/>
+      <geometry><box size="0.4680 1.3250 6.0000"/></geometry>
+    </collision>
+    <collision name="tower_right_col">
+      <origin xyz="1.0180 -4.3290 -0.4770"/>
+      <geometry><box size="0.2990 1.3200 6.0000"/></geometry>
+    </collision>
+  </link>
+
+  <!-- ================= carriage : platform on the roller bed ================ -->
+  <!-- export name: link "convoyeur", joint "slider" -->
+  <link name="carriage">
+    <inertial>
+      <origin xyz="0.73104 0.03887 0.45206" rpy="0 0 0"/>
+      <mass value="14.708"/>
+      <inertia ixx="0.96682" ixy="2.1305E-08" ixz="-3.4737E-08"
+               iyy="1.0388"  iyz="-0.0014398" izz="0.12891"/>
+    </inertial>
+    <visual name="platform">
+      <geometry><mesh filename="${mesh}/carriage.stl"/></geometry>
+      <material name="machine_green"/>
+    </visual>
+    <!-- The carriage is an open channel, not a solid block: a deck floor with a
+         wall down each side and both ends open along +/-Y, which is the pusher's
+         stroke direction.  A package sits on the floor between the walls. -->
+    <collision name="deck_floor">
+      <origin xyz="0.7312 -0.0011 0.4501"/>
+      <geometry><box size="0.5000 0.0670 0.9000"/></geometry>
+    </collision>
+    <collision name="wall_left">
+      <origin xyz="0.9622 0.0989 0.4501"/>
+      <geometry><box size="0.0390 0.1330 0.9000"/></geometry>
+    </collision>
+    <collision name="wall_right">
+      <origin xyz="0.5022 0.0989 0.4501"/>
+      <geometry><box size="0.0390 0.1330 0.9000"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="carriage_slide" type="prismatic">
+    <origin xyz="-1.4318 -6.1731 -1.5024" rpy="1.5708 0 3.1416"/>
+    <parent link="base_link"/>
+    <child  link="carriage"/>
+    <axis xyz="-1 0 0"/>                <!-- = +X in world -->
+    <limit lower="${slide_lower}" upper="${slide_upper}" effort="1500" velocity="1.0"/>
+    <dynamics damping="60.0" friction="8.0"/>
+  </joint>
+
+  <!-- ===================== pusher : blades on the carriage ================== -->
+  <!-- export name: link "guidage", joint "pusher" -->
+  <link name="pusher">
+    <inertial>
+      <origin xyz="-0.028597 0.035 -0.2" rpy="0 0 0"/>
+      <mass value="0.1474"/>
+      <inertia ixx="0.00060555" ixy="-2.2972E-20" ixz="1.5727E-20"
+               iyy="0.00056767" iyz="-6.4327E-17" izz="4.0345E-05"/>
+    </inertial>
+    <visual name="blades">
+      <geometry><mesh filename="${mesh}/pusher.stl"/></geometry>
+      <material name="safety_yellow"/>
+    </visual>
+    <collision name="blade_a_col">
+      <origin xyz="-0.0281 0.0354 -0.0598"/>
+      <geometry><box size="0.0300 0.0700 0.2200"/></geometry>
+    </collision>
+    <collision name="blade_b_col">
+      <origin xyz="-0.0281 0.0354 -0.3398"/>
+      <geometry><box size="0.0300 0.0700 0.2200"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="pusher_extend" type="prismatic">
+    <origin xyz="0.93104 0.065 0.08" rpy="0 1.5708 0"/>
+    <parent link="carriage"/>
+    <child  link="pusher"/>
+    <axis xyz="-1 0 0"/>                <!-- = +Y in world: across the conveyor,
+                                             toward the shelf.  The export had
+                                             this along +X, i.e. along the
+                                             conveyor, which cannot transfer. -->
+    <limit lower="${push_lower}" upper="${push_upper}" effort="600" velocity="0.5"/>
+    <dynamics damping="8.0" friction="1.0"/>
+  </joint>
+
+  <!-- ================== lift_carriage : the chain-lift carriage ============= -->
+  <!-- export name: link "axe x", joint "prismatic x".  The export gave this
+       dummy a mass of 1e-6 kg with 1.7e-13 inertia, which makes the solver
+       unstable; replaced with a plausible 25 kg welded carriage frame. -->
+  <link name="lift_carriage">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="25.0"/>
+      <inertia ixx="0.5208" ixy="0" ixz="0" iyy="2.2708" iyz="0" izz="2.4167"/>
+    </inertial>
+  </link>
+
+  <joint name="lift" type="prismatic">
+    <origin xyz="1.1669 -4.9292 2.5233" rpy="1.5708 0 0"/>
+    <parent link="base_link"/>
+    <child  link="lift_carriage"/>
+    <axis xyz="0 1 0"/>                 <!-- = +Z in world (vertical) -->
+    <limit lower="${lift_lower}" upper="${lift_upper}" effort="8000" velocity="0.8"/>
+    <dynamics damping="400.0" friction="40.0"/>
+  </joint>
+
+  <!-- ====================== shelf : the comptoir + tray ===================== -->
+  <!-- export name: link "axe y", joint "shelf" -->
+  <link name="shelf">
+    <inertial>
+      <origin xyz="-2.9714 -4.0448 -1.1359" rpy="0 0 0"/>
+      <mass value="104.96"/>
+      <inertia ixx="8.0654" ixy="-0.00026861" ixz="0.00082728"
+               iyy="152.65" iyz="0.11198"     izz="145.02"/>
+    </inertial>
+    <visual name="comptoir">
+      <geometry><mesh filename="${mesh}/shelf.stl"/></geometry>
+      <material name="machine_red"/>
+    </visual>
+    <!-- Deck floor, the two end walls, and the dividers that split the comptoir
+         into package slots.  The slots are what a pushed package drops into. -->
+    <!-- Deck floor, the two end walls, and the 11 dividers (30 mm wide on a
+         320 mm pitch, measured off the mesh) that split the comptoir into
+         twelve 290 mm package slots. -->
+    <collision name="deck_floor">
+      <origin xyz="-2.6499 -4.0813 -1.1112"/>
+      <geometry><box size="4.1000 0.0100 0.8000"/></geometry>
+    </collision>
+    <collision name="end_left">
+      <origin xyz="-4.6024 -3.9763 -1.1112"/>
+      <geometry><box size="0.1950 0.2000 0.8000"/></geometry>
+    </collision>
+    <collision name="end_right">
+      <origin xyz="-0.6499 -3.9763 -1.1112"/>
+      <geometry><box size="0.1000 0.2000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_1">
+      <origin xyz="-4.1999 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_2">
+      <origin xyz="-3.8799 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_3">
+      <origin xyz="-3.5599 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_4">
+      <origin xyz="-3.2399 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_5">
+      <origin xyz="-2.9199 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_6">
+      <origin xyz="-2.5999 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_7">
+      <origin xyz="-2.2799 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_8">
+      <origin xyz="-1.9599 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_9">
+      <origin xyz="-1.6399 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_10">
+      <origin xyz="-1.3199 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+    <collision name="divider_11">
+      <origin xyz="-0.9999 -4.0263 -1.1112"/>
+      <geometry><box size="0.0300 0.1000 0.8000"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="shelf_extend" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="lift_carriage"/>
+    <child  link="shelf"/>
+    <axis xyz="0 0 1"/>                 <!-- = -Y in world: positive now EXTENDS
+                                             the shelf toward the conveyor
+                                             (the export had it reversed) -->
+    <limit lower="${shelf_lower}" upper="${shelf_upper}" effort="3000" velocity="0.6"/>
+    <dynamics damping="200.0" friction="20.0"/>
+  </joint>
+
+  <xacro:if value="$(arg use_gazebo)">
+    <xacro:include filename="$(find assemforchouk_sim)/urdf/assemforchouk.ros2_control.xacro"/>
+    <xacro:include filename="$(find assemforchouk_sim)/urdf/assemforchouk.gazebo.xacro"/>
+  </xacro:if>
+</robot>

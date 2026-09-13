@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Industrial palette. URDF materials are carried into SDF by sdformat's
+       URDF parser, so these colours show up in Gazebo as well as RViz. -->
+  <material name="steel_frame">   <color rgba="0.16 0.31 0.48 1.0"/></material>
+  <material name="steel_dark">    <color rgba="0.25 0.27 0.30 1.0"/></material>
+  <material name="steel_light">   <color rgba="0.62 0.64 0.67 1.0"/></material>
+  <material name="concrete">      <color rgba="0.45 0.45 0.44 1.0"/></material>
+  <material name="safety_orange"> <color rgba="0.92 0.45 0.09 1.0"/></material>
+  <material name="safety_yellow"> <color rgba="0.90 0.75 0.05 1.0"/></material>
+  <material name="machine_green"> <color rgba="0.10 0.55 0.25 1.0"/></material>
+  <material name="machine_red">   <color rgba="0.72 0.14 0.14 1.0"/></material>
+</robot>

@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<sdf version="1.10">
+  <world name="assemforchouk_cell">
+
+    <physics name="1ms" type="dart">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"           name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"     name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-contact-system"           name="gz::sim::systems::Contact"/>
+    <plugin filename="gz-sim-sensors-system"           name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <gravity>0 0 -9.81</gravity>
+
+    <scene>
+      <ambient>0.55 0.55 0.58 1</ambient>
+      <background>0.75 0.80 0.86 1</background>
+      <grid>false</grid>
+      <shadows>true</shadows>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 12 0 0 0</pose>
+      <diffuse>0.9 0.9 0.86 1</diffuse>
+      <specular>0.25 0.25 0.25 1</specular>
+      <attenuation><range>60</range><constant>0.9</constant><linear>0.01</linear><quadratic>0.001</quadratic></attenuation>
+      <direction>-0.4 0.5 -0.9</direction>
+    </light>
+    <light type="point" name="hall_light">
+      <pose>-1.0 -4.6 7.5 0 0 0</pose>
+      <diffuse>0.45 0.45 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation><range>30</range><constant>0.6</constant><linear>0.03</linear><quadratic>0.002</quadratic></attenuation>
+      <cast_shadows>false</cast_shadows>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>120 120</size></plane></geometry>
+          <surface><friction><ode><mu>0.9</mu><mu2>0.9</mu2></ode></friction></surface>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>120 120</size></plane></geometry>
+          <material>
+            <ambient>0.35 0.36 0.38 1</ambient>
+            <diffuse>0.45 0.46 0.48 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <gui fullscreen="false">
+      <plugin filename="MinimalScene" name="3D View">
+        <gz-gui>
+          <title>3D View</title><property type="bool" key="showTitleBar">false</property>
+          <property type="string" key="state">docked</property>
+        </gz-gui>
+        <engine>ogre2</engine>
+        <scene>scene</scene>
+        <ambient_light>0.55 0.55 0.58</ambient_light>
+        <background_color>0.75 0.80 0.86</background_color>
+        <!-- three-quarter view onto the cell -->
+        <camera_pose>8.5 -13.5 6.0 0 0.30 1.22</camera_pose>
+      </plugin>
+      <plugin filename="GzSceneManager"      name="Scene Manager"/>
+      <plugin filename="InteractiveViewControl" name="Interactive view control"/>
+      <plugin filename="CameraTracking"      name="Camera Tracking"/>
+      <plugin filename="WorldControl"        name="World control">
+        <gz-gui>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="string" key="state">floating</property>
+          <property type="double" key="height">72</property>
+          <property type="double" key="width">121</property>
+          <anchors target="3D View"><line own="left" target="left"/><line own="bottom" target="bottom"/></anchors>
+        </gz-gui>
+        <play_pause>true</play_pause><step>true</step><start_paused>false</start_paused>
+      </plugin>
+      <plugin filename="WorldStats"          name="World stats">
+        <gz-gui>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="string" key="state">floating</property>
+          <property type="double" key="height">110</property>
+          <property type="double" key="width">290</property>
+          <anchors target="3D View"><line own="right" target="right"/><line own="bottom" target="bottom"/></anchors>
+        </gz-gui>
+        <sim_time>true</sim_time><real_time>true</real_time><real_time_factor>true</real_time_factor><iterations>true</iterations>
+      </plugin>
+      <plugin filename="EntityTree"          name="Entity tree"/>
+      <plugin filename="ComponentInspector"  name="Component inspector"/>
+    </gui>
+  </world>
+</sdf>
