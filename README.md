@@ -8,6 +8,16 @@ Rebuilt from the SolidWorks URDF export in the parent folder. The export could
 not be simulated as-is — see [docs/RECONSTRUCTION.md](docs/RECONSTRUCTION.md)
 for exactly what was wrong and what changed.
 
+### One complete work cycle
+
+![one complete work cycle, recorded from the simulation](docs/media/work_cycle.gif)
+
+Recorded from cycle 3 of `demo:=true` — package reception through the full
+paternoster circulation and back to the receive pose. 68.8 s of simulation at
+4.6x. Frame by frame:
+
+![storyboard of the same cycle](docs/media/work_cycle.png)
+
 ![the loaded comptoir parked at the receive pose](docs/simulation.png)
 
 ![one full paternoster circulation](docs/paternoster.png)
