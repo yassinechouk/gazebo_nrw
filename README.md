@@ -1,12 +1,21 @@
-# Assemforchouk — Gazebo simulation
+# NRW Makeathon — Gazebo Simulation
 
-Full simulation of the Assemforchouk **vertical chain-lift AS/RS cell**: a roller
-in-feed conveyor with a sliding carriage and transfer pusher, and a two-tower
-chain lift carrying an extending shelf, inside a 7.7 x 4.6 x 6.2 m cell.
+> **Part 2 of 2** — Gazebo simulation of the vertical chain-lift AS/RS storage cell.
+> See the parent repository [NRW_Makeathon](https://github.com/yassinechouk/NRW_Makeathon) for the full project (computer vision + simulation).
 
-Rebuilt from the SolidWorks URDF export in the parent folder. The export could
-not be simulated as-is — see [docs/RECONSTRUCTION.md](docs/RECONSTRUCTION.md)
-for exactly what was wrong and what changed.
+Full simulation of the **vertical chain-lift AS/RS cell**: a roller in-feed conveyor
+with a sliding carriage and transfer pusher, and a two-tower chain lift carrying an
+extending shelf, inside a 7.7 × 4.6 × 6.2 m cell.
+
+Rebuilt from the SolidWorks URDF export. The export could not be simulated as-is —
+see [docs/RECONSTRUCTION.md](docs/RECONSTRUCTION.md) for exactly what was wrong and
+what changed.
+
+---
+
+### Original CAD Design
+
+![SolidWorks CAD model of the vertical chain-lift AS/RS cell](docs/cad_design.png)
 
 ### One complete work cycle
 
@@ -14,7 +23,7 @@ for exactly what was wrong and what changed.
 
 Recorded from cycle 3 of `demo:=true` — package reception through the full
 paternoster circulation and back to the receive pose. 68.8 s of simulation at
-4.6x. Frame by frame:
+4.6×. Frame by frame:
 
 ![storyboard of the same cycle](docs/media/work_cycle.png)
 
@@ -31,13 +40,6 @@ paternoster circulation and back to the receive pose. 68.8 s of simulation at
 
 ## Build
 
-The workspace lives at `/home/yassine/Downloads/nrw_repo/Assemforchouk/sim`.
-Every command below assumes you are in that directory:
-
-```bash
-cd /home/yassine/Downloads/nrw_repo/Assemforchouk/sim
-```
-
 ```bash
 ./build.sh
 ```
@@ -47,12 +49,12 @@ cd /home/yassine/Downloads/nrw_repo/Assemforchouk/sim
 
 ## Run
 
-`source install/setup.bash` is what puts `assemforchouk_sim` on the ROS search
-path — without it `ros2 launch` only sees `/opt/ros/jazzy` and reports
-`package 'assemforchouk_sim' not found`. It is needed once per new terminal.
+`source install/setup.bash` is what puts the package on the ROS search path —
+without it `ros2 launch` only sees `/opt/ros/jazzy` and reports
+`package not found`. It is needed once per new terminal.
 
 ```bash
-source install/setup.bash && ros2 launch assemforchouk_sim gazebo.launch.py demo:=true
+source install/setup.bash && ros2 launch nrw_sim gazebo.launch.py demo:=true
 ```
 
 | launch argument | default | meaning |
@@ -62,12 +64,12 @@ source install/setup.bash && ros2 launch assemforchouk_sim gazebo.launch.py demo
 | `payload` | `true` | pre-load grey packages into the comptoir slots (all spawned at once) |
 | `rviz` | `false` | also open RViz2 |
 | `paused` | `false` | start paused |
-| `world` | `worlds/assemforchouk.sdf` | world file |
+| `world` | `worlds/nrw.sdf` | world file |
 
 Model only, no physics — useful for checking kinematics with joint sliders:
 
 ```bash
-ros2 launch assemforchouk_sim display.launch.py
+ros2 launch nrw_sim display.launch.py
 ```
 
 ## Drive it
@@ -75,24 +77,24 @@ ros2 launch assemforchouk_sim display.launch.py
 One axis at a time:
 
 ```bash
-ros2 run assemforchouk_sim jog.py lift 1.8
+ros2 run nrw_sim jog.py lift 1.8
 ```
 
 ```bash
-ros2 run assemforchouk_sim jog.py carriage_slide -1.2 --time 4
+ros2 run nrw_sim jog.py carriage_slide -1.2 --time 4
 ```
 
 The full work cycle (carriage to the transfer station, shelf out, pusher
 transfer, shelf in, lift to storage level, deposit, return):
 
 ```bash
-ros2 run assemforchouk_sim cycle_demo.py --ros-args -p loops:=3 -p speed:=1.5
+ros2 run nrw_sim cycle_demo.py --ros-args -p loops:=3 -p speed:=1.5
 ```
 
 More packages:
 
 ```bash
-ros2 run assemforchouk_sim spawn_payload.py --ros-args -p where:=shelf -p count:=8
+ros2 run nrw_sim spawn_payload.py --ros-args -p where:=shelf -p count:=8
 ```
 
 Raw trajectory, if you would rather not use the helpers:
@@ -198,11 +200,11 @@ sim/
 ├── tools/
 │   ├── build_meshes.py           segment + assign + decimate the source STLs
 │   └── kin.py                    forward kinematics of the exported joint tree
-└── src/assemforchouk_sim/
-    ├── urdf/                     assemforchouk.urdf.xacro + ros2_control + gazebo
+└── src/nrw_sim/
+    ├── urdf/                     nrw.urdf.xacro + ros2_control + gazebo
     ├── meshes/                   10 rebuilt STLs, 2.0 MB total
     ├── config/controllers.yaml
-    ├── worlds/assemforchouk.sdf
+    ├── worlds/nrw.sdf
     ├── launch/                   gazebo.launch.py, display.launch.py
     ├── scripts/                  cycle_demo.py, jog.py, spawn_payload.py
     └── rviz/
