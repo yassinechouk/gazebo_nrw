@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Automatic storage / retrieval work cycle for the Assemforchouk cell.
+Automatic storage / retrieval work cycle for the NRW vertical chain-lift AS/RS cell.
 
 Drives the four prismatic axes through a full put-away and retrieval sequence
 via the cell_controller JointTrajectory action, then repeats.
 
-    ros2 run assemforchouk_sim cycle_demo.py
-    ros2 run assemforchouk_sim cycle_demo.py --ros-args -p loops:=3 -p speed:=1.5
+    ros2 run nrw_cell_sim cycle_demo.py
+    ros2 run nrw_cell_sim cycle_demo.py --ros-args -p loops:=3 -p speed:=1.5
 """
 import sys
 import rclpy
@@ -108,7 +108,7 @@ def build_cycle(slot_slide):
 
 class CycleDemo(Node):
     def __init__(self):
-        super().__init__('assemforchouk_cycle_demo')
+        super().__init__('nrw_cell_cycle_demo')
         self.declare_parameter('loops', 0)        # 0 = run forever
         self.declare_parameter('speed', 1.0)      # >1 = faster
         self.declare_parameter('controller', 'cell_controller')

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Full Gazebo Harmonic simulation of the Assemforchouk AS/RS cell."""
+"""Full Gazebo Harmonic simulation of the NRW vertical chain-lift AS/RS cell."""
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
                             RegisterEventHandler, OpaqueFunction)
@@ -12,8 +12,8 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.parameter_descriptions import ParameterValue
 
-PKG = 'assemforchouk_sim'
-WORLD_NAME = 'assemforchouk_cell'
+PKG = 'nrw_cell_sim'
+WORLD_NAME = 'nrw_cell_world'
 
 
 def generate_launch_description():
@@ -31,12 +31,12 @@ def generate_launch_description():
         DeclareLaunchArgument('payload', default_value='true',
                               description='pre-load grey packages into the comptoir slots'),
         DeclareLaunchArgument('world', default_value=PathJoinSubstitution(
-            [share, 'worlds', 'assemforchouk.sdf'])),
+            [share, 'worlds', 'nrw_cell.sdf'])),
     ]
 
     robot_description = ParameterValue(Command([
         FindExecutable(name='xacro'), ' ',
-        PathJoinSubstitution([share, 'urdf', 'assemforchouk.urdf.xacro']),
+        PathJoinSubstitution([share, 'urdf', 'nrw_cell.urdf.xacro']),
     ]), value_type=str)
 
     # -s = server only (headless), -r = start running instead of paused
@@ -62,7 +62,7 @@ def generate_launch_description():
     spawn = Node(
         package='ros_gz_sim', executable='create', output='screen',
         arguments=['-topic', 'robot_description',
-                   '-name', 'assemforchouk',
+                   '-name', 'nrw_cell',
                    '-world', WORLD_NAME,
                    '-x', '0', '-y', '0', '-z', '0'],
     )
@@ -85,7 +85,7 @@ def generate_launch_description():
     rviz = Node(
         package='rviz2', executable='rviz2', output='log',
         condition=IfCondition(LaunchConfiguration('rviz')),
-        arguments=['-d', PathJoinSubstitution([share, 'rviz', 'assemforchouk.rviz'])],
+        arguments=['-d', PathJoinSubstitution([share, 'rviz', 'nrw_cell.rviz'])],
         parameters=[{'use_sim_time': True}],
     )
 

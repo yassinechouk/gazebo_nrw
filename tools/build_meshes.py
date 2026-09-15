@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Reconstruct per-link meshes for the Assemforchouk AS/RS cell.
+Reconstruct per-link meshes for the NRW vertical chain-lift AS/RS cell.
 
 The SolidWorks URDF export wrote the *entire assembly* into every link's STL
 (5 x ~60 MB, 1.2 M triangles each, all containing the same 266 static parts).
@@ -36,7 +36,7 @@ def read_stl(path):
     return np.frombuffer(d[:, 12:48].tobytes(), dtype='<f4').reshape(n, 3, 3).astype(np.float64)
 
 
-def write_stl(path, tri, header=b'assemforchouk'):
+def write_stl(path, tri, header=b'nrw_cell'):
     tri = np.asarray(tri, dtype=np.float64)
     n = len(tri)
     nrm = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
@@ -173,7 +173,7 @@ def main():
     here = os.path.dirname(os.path.abspath(__file__))
     ap.add_argument('--src', default=os.path.abspath(os.path.join(here, '..', '..', 'meshes')))
     ap.add_argument('--out', default=os.path.abspath(os.path.join(here, '..', 'src',
-                                                    'assemforchouk_sim', 'meshes')))
+                                                    'nrw_cell_sim', 'meshes')))
     ap.add_argument('--cache', default=os.path.join(here, '.seg_cache.pkl'))
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
@@ -269,7 +269,7 @@ def main():
                 chunks.append((v - t) @ Rinv.T)
         tri = np.concatenate(chunks).reshape(-1, 3, 3)
         fp = os.path.join(a.out, name + '.stl')
-        n = write_stl(fp, tri, header=f'assemforchouk:{name}'.encode())
+        n = write_stl(fp, tri, header=f'nrw_cell:{name}'.encode())
         src_n = sum(p['ntri'] for p in plist)
         total_in += src_n
         total_out += n

@@ -3,7 +3,7 @@
 The source package (`../../urdf`, `../../meshes`) is a SolidWorks
 `sw_urdf_exporter` output. It is a valid *description* of the kinematics but it
 cannot be simulated as shipped. This document records every difference between
-the export and the model in `src/assemforchouk_sim/urdf/`, so nothing here is a
+the export and the model in `src/nrw_cell_sim/urdf/`, so nothing here is a
 silent change.
 
 ---
@@ -150,7 +150,7 @@ is used instead. `base_link` is fixed to the world, so this is inert either way.
   `empty_world.launch`, `rostopic pub /calibrated`). Rewritten for ROS 2 Jazzy
   and Gazebo Harmonic.
 * The package name `Assemforchouk` is invalid in ROS 2, which requires
-  `^[a-z][a-z0-9_]*$`. Renamed `assemforchouk_sim`.
+  `^[a-z][a-z0-9_]*$`. Renamed `nrw_cell_sim`.
 
 ---
 

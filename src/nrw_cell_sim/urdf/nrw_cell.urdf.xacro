@@ -1,24 +1,24 @@
 <?xml version="1.0"?>
 <!--
-  Assemforchouk - vertical chain lift (paternoster) AS/RS cell.
+  NRW Makeathon — vertical chain-lift AS/RS cell (paternoster).
 
   Rebuilt for ROS 2 / Gazebo from the SolidWorks URDF export in ../../../urdf.
   Kinematics (joint origins, rpy, axes) are taken verbatim from that export and
   were verified by forward kinematics against the CAD geometry.  Geometry,
   names, limits, inertia of the dummy carriage, and the world attachment are
-  reconstructed - see docs/RECONSTRUCTION.md for exactly what changed and why.
+  reconstructed — see docs/RECONSTRUCTION.md for exactly what changed and why.
 
-      world ─fixed─ base_link ┬─ carriage_slide (X) ─ carriage ─ pusher_extend (X) ─ pusher
+      world ─fixed─ base_link ┬─ carriage_slide (X) ─ carriage ─ pusher_extend (Y) ─ pusher
                               └─ lift           (Z) ─ lift_carriage ─ shelf_extend (Y) ─ shelf
 -->
-<robot name="assemforchouk" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="nrw_cell" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:arg name="fix_to_world"  default="true"/>
   <xacro:arg name="use_gazebo"    default="true"/>
   <xacro:arg name="controllers_file"
-             default="$(find assemforchouk_sim)/config/controllers.yaml"/>
+             default="$(find nrw_cell_sim)/config/controllers.yaml"/>
 
-  <xacro:property name="mesh" value="package://assemforchouk_sim/meshes"/>
+  <xacro:property name="mesh" value="package://nrw_cell_sim/meshes"/>
 
   <!-- Plinth underside sits at z = -3.592 in the CAD base frame; lift the whole
        model so the machine stands on the ground plane. -->
@@ -43,7 +43,7 @@
   <!-- shelf deck abuts the carriage deck edge-to-edge at exactly this value -->
   <xacro:property name="shelf_transfer" value="1.055"/>
 
-  <xacro:include filename="$(find assemforchouk_sim)/urdf/materials.xacro"/>
+  <xacro:include filename="$(find nrw_cell_sim)/urdf/materials.xacro"/>
 
   <!-- =========================== world attachment =========================== -->
   <xacro:if value="$(arg fix_to_world)">
@@ -281,7 +281,7 @@
   </joint>
 
   <xacro:if value="$(arg use_gazebo)">
-    <xacro:include filename="$(find assemforchouk_sim)/urdf/assemforchouk.ros2_control.xacro"/>
-    <xacro:include filename="$(find assemforchouk_sim)/urdf/assemforchouk.gazebo.xacro"/>
+    <xacro:include filename="$(find nrw_cell_sim)/urdf/nrw_cell.ros2_control.xacro"/>
+    <xacro:include filename="$(find nrw_cell_sim)/urdf/nrw_cell.gazebo.xacro"/>
   </xacro:if>
 </robot>

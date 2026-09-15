@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(assemforchouk_sim)
+project(nrw_cell_sim)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)

@@ -2,8 +2,8 @@
 """
 Send one axis to a position.
 
-    ros2 run assemforchouk_sim jog.py lift 1.5
-    ros2 run assemforchouk_sim jog.py carriage_slide -1.2 --time 4
+    ros2 run nrw_cell_sim jog.py lift 1.5
+    ros2 run nrw_cell_sim jog.py carriage_slide -1.2 --time 4
 """
 import argparse, sys
 import rclpy
@@ -21,7 +21,7 @@ LIMITS = {'carriage_slide': (-1.90, 3.40), 'pusher_extend': (0.0, 1.05),
 
 class Jog(Node):
     def __init__(self):
-        super().__init__('assemforchouk_jog')
+        super().__init__('nrw_cell_jog')
         self.state = None
         self.create_subscription(JointState, '/joint_states', self._cb, 10)
         self.cli = ActionClient(self, FollowJointTrajectory,

@@ -10,14 +10,14 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.parameter_descriptions import ParameterValue
 
-PKG = 'assemforchouk_sim'
+PKG = 'nrw_cell_sim'
 
 
 def generate_launch_description():
     share = FindPackageShare(PKG)
     robot_description = ParameterValue(Command([
         FindExecutable(name='xacro'), ' ',
-        PathJoinSubstitution([share, 'urdf', 'assemforchouk.urdf.xacro']),
+        PathJoinSubstitution([share, 'urdf', 'nrw_cell.urdf.xacro']),
         ' use_gazebo:=false',
     ]), value_type=str)
     return LaunchDescription([
@@ -27,5 +27,5 @@ def generate_launch_description():
         Node(package='joint_state_publisher_gui', executable='joint_state_publisher_gui',
              output='screen'),
         Node(package='rviz2', executable='rviz2', output='log',
-             arguments=['-d', PathJoinSubstitution([share, 'rviz', 'assemforchouk.rviz'])]),
+             arguments=['-d', PathJoinSubstitution([share, 'rviz', 'nrw_cell.rviz'])]),
     ])

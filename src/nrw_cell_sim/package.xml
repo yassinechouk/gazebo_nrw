@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>assemforchouk_sim</name>
+  <name>nrw_cell_sim</name>
   <version>1.0.0</version>
   <description>
-    Gazebo (Harmonic) + ros2_control simulation of the Assemforchouk vertical
-    chain-lift AS/RS cell: a roller in-feed conveyor with a sliding carriage and
-    pusher, and a two-tower chain lift carrying an extending shelf.
-    Rebuilt from a SolidWorks URDF export.
+    Gazebo Harmonic + gz_ros2_control simulation of the NRW Makeathon
+    vertical chain-lift AS/RS cell: a roller in-feed conveyor with a sliding
+    carriage and pusher, and a two-tower paternoster lift carrying an extending
+    shelf. Rebuilt from a SolidWorks URDF export.
   </description>
   <maintainer email="yassine.chouk@insat.ucar.tn">Yassine Chouk</maintainer>
   <license>BSD-3-Clause</license>

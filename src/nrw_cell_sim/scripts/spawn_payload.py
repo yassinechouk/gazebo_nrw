@@ -12,9 +12,9 @@ Two stations, matching how the cell actually works:
   shelf     packages pre-loaded into the red comptoir's slots, so the shelf
             arrives already carrying stock.
 
-    ros2 run assemforchouk_sim spawn_payload.py                       # both
-    ros2 run assemforchouk_sim spawn_payload.py --ros-args -p where:=shelf -p count:=6
-    ros2 run assemforchouk_sim spawn_payload.py --ros-args -p where:=carriage -p slide:=-1.85
+    ros2 run nrw_cell_sim spawn_payload.py                       # both
+    ros2 run nrw_cell_sim spawn_payload.py --ros-args -p where:=shelf -p count:=6
+    ros2 run nrw_cell_sim spawn_payload.py --ros-args -p where:=carriage -p slide:=-1.85
 """
 import concurrent.futures
 import subprocess
@@ -23,7 +23,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 
-WORLD = 'assemforchouk_cell'
+WORLD = 'nrw_cell_world'
 GROUND = 3.592          # CAD base frame -> world Z
 
 # ---- cell geometry, base frame, every axis at zero -------------------------
@@ -100,7 +100,7 @@ def shelf_pose(slot_index, shelf_extend=0.0, lift=0.0, size=PKG):
 
 class Spawner(Node):
     def __init__(self):
-        super().__init__('assemforchouk_spawn_payload')
+        super().__init__('nrw_cell_spawn_payload')
         self._joints = {}
         self.create_subscription(JointState, '/joint_states', self._on_joints, 10)
         self.declare_parameter('where', 'both')      # carriage | shelf | both
